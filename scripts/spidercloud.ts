@@ -1,12 +1,12 @@
 #!/usr/bin/env npx tsx
 /**
- * SpiderCloud API client for crawling websites and saving pages as markdown.
+ * SpiderCloud API client for scraping specific pages as markdown.
  *
  * Usage:
- *   npx tsx scripts/spidercloud.ts <url> <output_dir> [--limit N]
+ *   npx tsx scripts/spidercloud.ts <output_dir> <url1> [url2] [url3] ...
  *
  * Example:
- *   npx tsx scripts/spidercloud.ts https://acme.com docs/research/website --limit 10
+ *   npx tsx scripts/spidercloud.ts docs/research/website https://acme.com https://acme.com/about https://acme.com/pricing
  */
 
 import { config } from "dotenv";
@@ -25,46 +25,61 @@ interface PageMetadata {
   description?: string;
 }
 
-interface CrawlResult {
+interface ScrapeResult {
   url: string;
   content: string;
   metadata?: PageMetadata;
 }
 
-interface CrawlSummary {
-  url: string;
-  pagesFound: number;
+interface ScrapeSummary {
+  pagesRequested: number;
+  pagesScraped: number;
   filesSaved: string[];
 }
 
 /**
- * Crawl a website using SpiderCloud API.
+ * Scrape a single page using SpiderCloud API.
  */
-async function crawlWebsite(url: string, limit: number = 10): Promise<CrawlResult[]> {
+async function scrapePage(url: string): Promise<ScrapeResult | null> {
   if (!API_KEY) {
     throw new Error("SPIDERCLOUD_API_KEY not found in environment");
   }
 
-  const response = await fetch(`${API_BASE}/crawl`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      url,
-      limit,
-      return_format: "markdown",
-      metadata: true,
-    }),
-  });
+  try {
+    const response = await fetch(`${API_BASE}/scrape`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        url,
+        return_format: "markdown",
+        metadata: true,
+      }),
+    });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`API error (${response.status}): ${error}`);
+    if (!response.ok) {
+      const error = await response.text();
+      console.error(`  Failed to scrape ${url}: ${error}`);
+      return null;
+    }
+
+    const results = await response.json();
+    // API returns array, we want first result
+    return Array.isArray(results) ? results[0] : results;
+  } catch (error) {
+    console.error(`  Error scraping ${url}: ${error}`);
+    return null;
   }
+}
 
-  return response.json();
+/**
+ * Scrape multiple pages in parallel.
+ */
+async function scrapePages(urls: string[]): Promise<ScrapeResult[]> {
+  const results = await Promise.all(urls.map(scrapePage));
+  return results.filter((r): r is ScrapeResult => r !== null && !!r.content);
 }
 
 /**
@@ -93,15 +108,16 @@ function urlToFilename(url: string): string {
 }
 
 /**
- * Save crawled pages as markdown files.
+ * Save scraped pages as markdown files.
  */
 async function savePages(
-  pages: CrawlResult[],
+  pages: ScrapeResult[],
   outputDir: string
 ): Promise<string[]> {
   await mkdir(outputDir, { recursive: true });
 
   const savedFiles: string[] = [];
+  const seenFilenames = new Set<string>();
 
   for (const page of pages) {
     const { url, content, metadata } = page;
@@ -110,7 +126,19 @@ async function savePages(
       continue;
     }
 
-    const filename = urlToFilename(url);
+    let filename = urlToFilename(url);
+
+    // Handle duplicate filenames
+    if (seenFilenames.has(filename)) {
+      const base = filename.replace(/\.md$/, "");
+      let counter = 2;
+      while (seenFilenames.has(`${base}-${counter}.md`)) {
+        counter++;
+      }
+      filename = `${base}-${counter}.md`;
+    }
+    seenFilenames.add(filename);
+
     const filepath = join(outputDir, filename);
 
     // Add metadata header
@@ -139,11 +167,6 @@ async function main() {
   const { values, positionals } = parseArgs({
     allowPositionals: true,
     options: {
-      limit: {
-        type: "string",
-        short: "l",
-        default: "10",
-      },
       help: {
         type: "boolean",
         short: "h",
@@ -154,35 +177,39 @@ async function main() {
 
   if (values.help || positionals.length < 2) {
     console.log(`
-Usage: npx tsx scripts/spidercloud.ts <url> <output_dir> [--limit N]
+Usage: npx tsx scripts/spidercloud.ts <output_dir> <url1> [url2] [url3] ...
 
 Arguments:
-  url         Website URL to crawl
   output_dir  Directory to save markdown files
+  urls        One or more URLs to scrape
 
 Options:
-  --limit, -l  Max pages to crawl (default: 10)
-  --help, -h   Show this help message
+  --help, -h  Show this help message
+
+Example:
+  npx tsx scripts/spidercloud.ts docs/research/website \\
+    https://acme.com \\
+    https://acme.com/about \\
+    https://acme.com/pricing
 `);
     process.exit(positionals.length < 2 ? 1 : 0);
   }
 
-  const [url, outputDir] = positionals;
-  const limit = parseInt(values.limit!, 10);
+  const [outputDir, ...urls] = positionals;
 
-  console.log(`Crawling ${url}...`);
+  console.log(`Scraping ${urls.length} page(s)...`);
 
   try {
-    const pages = await crawlWebsite(url, limit);
-    console.log(`Found ${pages.length} pages`);
+    const pages = await scrapePages(urls);
+    console.log(`Successfully scraped ${pages.length}/${urls.length} pages`);
 
     const saved = await savePages(pages, outputDir);
     console.log(`\nSaved ${saved.length} files to ${outputDir}`);
 
     // Output summary as JSON for easy parsing
-    const summary: CrawlSummary = {
-      url,
-      pagesFound: pages.length,
+    const summary: ScrapeSummary = {
+      pagesRequested: urls.length,
+      pagesScraped: pages.length,
       filesSaved: saved,
     };
     console.log(`\n${JSON.stringify(summary, null, 2)}`);
