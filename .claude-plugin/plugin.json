@@ -1,0 +1,5 @@
+{
+  "name": "gtm-agent",
+  "version": "1.0.0",
+  "description": "GTM context generation skills. Crawls company websites, researches public sources, and generates complete context files for go-to-market campaigns."
+}

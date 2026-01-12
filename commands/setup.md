@@ -61,9 +61,9 @@ Identify relevant pages to scrape:
 
 ### 3b: Scrape Website (parallel with 3c)
 
-Run SpiderCloud script with selected URLs:
+Run SpiderCloud script with selected URLs (source .env for API key):
 ```bash
-npx tsx scripts/spidercloud.ts docs/research/website [url1] [url2] [url3] ...
+source .env && npx tsx scripts/spidercloud.ts docs/research/website [url1] [url2] [url3] ...
 ```
 
 ### 3c: Research Public Sources (parallel with 3b)

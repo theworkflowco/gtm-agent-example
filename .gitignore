@@ -1,9 +1,8 @@
 # Environment variables (API keys)
 .env
 
-# Node.js
+# Node.js (not used, but kept in case of accidental npm install)
 node_modules/
-dist/
 
 # OS
 .DS_Store

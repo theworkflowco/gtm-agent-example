@@ -47,10 +47,10 @@ From the discovered URLs, identify pages that are relevant for context generatio
 
 ### Phase 3: Scrape Selected Pages
 
-Run the SpiderCloud script with the selected URLs:
+Run the SpiderCloud script with the selected URLs (source .env for API key):
 
 ```bash
-npx tsx scripts/spidercloud.ts docs/research/website \
+source .env && npx tsx scripts/spidercloud.ts docs/research/website \
   https://acme.com \
   https://acme.com/about \
   https://acme.com/pricing \
@@ -80,7 +80,7 @@ Each file has metadata headers:
 1. WebSearch: `site:wfco.co`
 2. Results show: `/`, `/about`, `/pricing`, `/walkthrough`, `/blog/...`, `/legal/...`
 3. Filter to: `/`, `/about`, `/pricing`, `/walkthrough` (skip blog and legal)
-4. Run: `npx tsx scripts/spidercloud.ts docs/research/website https://wfco.co https://wfco.co/about https://wfco.co/pricing https://wfco.co/walkthrough`
+4. Run: `source .env && npx tsx scripts/spidercloud.ts docs/research/website https://wfco.co https://wfco.co/about https://wfco.co/pricing https://wfco.co/walkthrough`
 
 ## Error Handling
 
@@ -90,6 +90,6 @@ Each file has metadata headers:
 
 ## Dependencies
 
-- Node.js with tsx
-- `SPIDERCLOUD_API_KEY` in `.env`
+- Node.js (tsx installed via npx on first run)
+- `SPIDERCLOUD_API_KEY` in `.env` (copy from `.env.example`)
 - `scripts/spidercloud.ts`

@@ -6,16 +6,14 @@
  *   npx tsx scripts/spidercloud.ts <output_dir> <url1> [url2] [url3] ...
  *
  * Example:
- *   npx tsx scripts/spidercloud.ts docs/research/website https://acme.com https://acme.com/about https://acme.com/pricing
+ *   SPIDERCLOUD_API_KEY=xxx npx tsx scripts/spidercloud.ts docs/research/website https://acme.com https://acme.com/about
+ *
+ * The SPIDERCLOUD_API_KEY environment variable must be set before running.
  */
 
-import { config } from "dotenv";
 import { mkdir, writeFile } from "fs/promises";
 import { join } from "path";
 import { parseArgs } from "util";
-
-// Load environment variables
-config();
 
 const API_BASE = "https://api.spider.cloud";
 const API_KEY = process.env.SPIDERCLOUD_API_KEY;

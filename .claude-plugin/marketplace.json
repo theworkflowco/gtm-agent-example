@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "gtm-agent-marketplace",
+  "version": "1.0.0",
+  "description": "GTM context generation tools for go-to-market campaigns",
+  "owner": {
+    "name": "The Workflow Company",
+    "email": "hello@wfco.co"
+  },
+  "plugins": [
+    {
+      "name": "gtm-agent",
+      "description": "GTM context generation skills. Crawls company websites, researches public sources (Crunchbase, G2, job postings, news), and generates complete context files for go-to-market campaigns. Use /setup to initialize a new company context.",
+      "version": "1.0.0",
+      "source": "./",
+      "category": "productivity",
+      "tags": ["gtm", "sales", "marketing", "context", "research", "campaigns", "cold-email"],
+      "strict": false,
+      "license": "MIT"
+    }
+  ]
+}
