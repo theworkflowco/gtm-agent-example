@@ -72,7 +72,7 @@ Run these WebSearches:
 - `site:crunchbase.com "[company name]"`
 - `site:g2.com "[company name]" reviews`
 - `"[company name]" careers OR jobs site:linkedin.com/jobs`
-- `"[company name]" funding OR announcement 2024 OR 2025`
+- `"[company name]" funding OR announcement [PREV_YEAR] OR [CURRENT_YEAR]` *(use today's date)*
 
 For LinkedIn Jobs and news, use WebFetch to get full content.
 
@@ -89,18 +89,39 @@ Read all research files and create:
 
 Follow the synthesize skill for structure.
 
-## Step 5: Generate Contexts
+## Step 5: Generate Contexts (Parallel)
 
-From the research summary, generate:
-- `contexts/company.md`
-- `contexts/products.md`
-- `contexts/narrative.md`
-- `contexts/messaging.md`
-- `contexts/personas/*.md` (2-3 personas)
-- `contexts/offers/*.md` (2-3 offers)
+Generate context files using the individual skills. **Run these in parallel** using the Task tool with multiple agents:
+
+### Core Contexts (parallel)
+| Skill | Output |
+|-------|--------|
+| `generate-context-company` | `contexts/company.md` |
+| `generate-context-products` | `contexts/products.md` |
+| `generate-context-narrative` | `contexts/narrative.md` |
+| `generate-context-messaging` | `contexts/messaging.md` |
+
+### Personas (parallel, 2-3 personas)
+Use `generate-context-personas` for each:
+- `contexts/personas/[persona-1].md`
+- `contexts/personas/[persona-2].md`
+- `contexts/personas/[persona-3].md` (optional)
+
+### Offers (parallel, 2-3 offers)
+Use `generate-context-offers` for each:
+- `contexts/offers/[offer-1].md`
+- `contexts/offers/[offer-2].md`
+- `contexts/offers/[offer-3].md` (optional)
+
+### Cold Email (after messaging is complete)
+Use `generate-context-cold-email` (requires messaging.md and narrative.md):
 - `contexts/coldEmailBestPractices.md`
 
-Follow the generate-contexts skill for each file's structure.
+**Parallelization strategy:**
+1. Run company, products, narrative in parallel (no dependencies)
+2. Run messaging after narrative completes (uses voice/tone)
+3. Run personas and offers in parallel (depend on products, messaging)
+4. Run cold-email last (depends on messaging, narrative, personas)
 
 ## Step 6: Generate Sample Campaign
 

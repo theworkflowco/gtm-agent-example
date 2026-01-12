@@ -78,8 +78,10 @@ site:g2.com "company-name" reviews
 
 **Search:**
 ```
-"company-name" funding OR announcement OR launch 2024 OR 2025
+"company-name" funding OR announcement OR launch [PREV_YEAR] OR [CURRENT_YEAR]
 ```
+
+*(Calculate years from today's date in your system context, e.g., if today is 2026-01-11, use `2025 OR 2026`)*
 
 **Then WebFetch** news article URLs for full content.
 
