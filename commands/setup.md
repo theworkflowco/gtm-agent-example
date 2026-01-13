@@ -68,19 +68,59 @@ source .env && npx tsx scripts/spidercloud.ts docs/research/website [url1] [url2
 
 ### 3c: Research Public Sources (parallel with 3b)
 
-Run these WebSearches:
-- `site:crunchbase.com "[company name]"`
-- `site:g2.com "[company name]" reviews`
-- `"[company name]" careers OR jobs site:linkedin.com/jobs`
-- `"[company name]" funding OR announcement [PREV_YEAR] OR [CURRENT_YEAR]` *(use today's date)*
+Use the `research-public` skill for core research.
+
+**Critical: Disambiguation**
+Always use domain + company name in queries to avoid wrong company results:
+- `site:crunchbase.com "[company name]" "[domain]"`
+- `site:g2.com "[company name]" "[domain]" reviews`
+- `"[company name]" "[domain]" careers OR jobs site:linkedin.com/jobs`
+- `"[company name]" "[domain]" funding OR announcement [PREV_YEAR] OR [CURRENT_YEAR]` *(use today's date)*
 
 For LinkedIn Jobs and news, use WebFetch to get full content.
 
-Save results to:
+**Output files:**
 - `docs/research/crunchbase-data.md`
 - `docs/research/g2-analysis.md`
 - `docs/research/job-postings.md`
 - `docs/research/news-mentions.md`
+
+### 3d: Recommend Specialized Research
+
+After core research, summarize findings and recommend specialized research:
+
+```
+Core research complete for [Company] ([domain]).
+
+**What I Found:**
+- Stage: [Series X, $XM raised, led by Investors]
+- Team: [~X employees, hiring Y roles in Z departments]
+- Market: [G2 rating, category, key competitors]
+- Momentum: [Recent news summary]
+- Tech: [Stack hints from job postings]
+
+**Specialized Research Recommendations:**
+
+1. research-competitive ✓ Recommended
+   → [Rationale based on findings]
+
+2. research-signals ✓ Recommended
+   → [Rationale based on findings]
+
+3. research-techstack
+   → [Rationale based on findings]
+
+4. research-voice
+   → [Rationale based on findings]
+
+Which should I run? (e.g., "1, 2" or "all" or "none")
+```
+
+Based on user response, run selected skills in parallel:
+- `research-competitive` → `docs/research/competitive-analysis.md`
+- `research-signals` → `docs/research/buying-signals.md`
+- `research-techstack` → `docs/research/techstack-analysis.md`
+- `research-voice` → `docs/research/voice-analysis.md`
 
 ## Step 4: Synthesize
 
