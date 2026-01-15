@@ -23,13 +23,13 @@ Extract the domain (e.g., `acme.com` from `https://www.acme.com/about`).
 ```
 Where should I create the context files?
 
-A) Populate this repo in place
-B) Create new repo: gtm-context-[domain]
+1) Populate this repo in place
+2) Create new repo: gtm-context-[domain]
 
 >
 ```
 
-**If B selected:**
+**If 2 selected:**
 1. Create directory `../gtm-context-[domain]`
 2. Copy this repo's structure (without .git)
 3. Initialize new git repo
@@ -61,10 +61,18 @@ Identify relevant pages to scrape:
 
 ### 3b: Scrape Website (parallel with 3c)
 
-Run SpiderCloud script with selected URLs (source .env for API key):
+Run SpiderCloud script with selected URLs.
+
+**Finding the API key:**
+1. Read `.env` in current directory to get `SPIDERCLOUD_API_KEY`
+2. If `.env` not found locally, fall back to template repo's `.env` (e.g., `../gtm-agent-example/.env` or the original clone location)
+3. Use inline env var syntax for reliability:
+
 ```bash
-source .env && npx tsx scripts/spidercloud.ts docs/research/website [url1] [url2] [url3] ...
+SPIDERCLOUD_API_KEY=<key-from-env-file> npx tsx scripts/spidercloud.ts docs/research/website [url1] [url2] [url3] ...
 ```
+
+**Note:** Using `SPIDERCLOUD_API_KEY=value command` is more reliable than `source .env && command` because it directly passes the env var to the subprocess.
 
 ### 3c: Research Public Sources (parallel with 3b)
 
@@ -218,6 +226,7 @@ Next steps:
 - **No Crunchbase/G2 data:** Note in research, generate contexts with available data
 - **SpiderCloud fails:** Fall back to WebFetch for key pages
 - **Partial data:** Generate what's possible, flag gaps clearly
+- **SPIDERCLOUD_API_KEY not found:** Check `.env` in current directory first, then fall back to the original template repo location (e.g., `../gtm-agent-example/.env`). If neither exists, inform user to copy `.env.example` to `.env` and add their API key.
 
 ## Parallelization
 

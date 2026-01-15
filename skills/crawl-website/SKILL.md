@@ -47,14 +47,32 @@ From the discovered URLs, identify pages that are relevant for context generatio
 
 ### Phase 3: Scrape Selected Pages
 
-Run the SpiderCloud script with the selected URLs (source .env for API key):
+Run the SpiderCloud script with the selected URLs.
+
+**Finding the API key:**
+1. Check if `.env` exists in current directory
+2. If not found, fall back to the template repo's `.env` at the original gtm-agent-example location
+3. Extract `SPIDERCLOUD_API_KEY` value from the file
+
+**Run with inline env var** (more reliable than `source`):
 
 ```bash
-source .env && npx tsx scripts/spidercloud.ts docs/research/website \
+SPIDERCLOUD_API_KEY=<key-from-env-file> npx tsx scripts/spidercloud.ts docs/research/website \
   https://acme.com \
   https://acme.com/about \
   https://acme.com/pricing \
   https://acme.com/product
+```
+
+**Example with fallback check:**
+```bash
+# If .env exists locally, use it; otherwise check template repo
+if [ -f .env ]; then
+  KEY=$(grep SPIDERCLOUD_API_KEY .env | cut -d= -f2)
+elif [ -f /path/to/gtm-agent-example/.env ]; then
+  KEY=$(grep SPIDERCLOUD_API_KEY /path/to/gtm-agent-example/.env | cut -d= -f2)
+fi
+SPIDERCLOUD_API_KEY=$KEY npx tsx scripts/spidercloud.ts docs/research/website [urls...]
 ```
 
 ## Output
@@ -80,13 +98,18 @@ Each file has metadata headers:
 1. WebSearch: `site:wfco.co`
 2. Results show: `/`, `/about`, `/pricing`, `/walkthrough`, `/blog/...`, `/legal/...`
 3. Filter to: `/`, `/about`, `/pricing`, `/walkthrough` (skip blog and legal)
-4. Run: `source .env && npx tsx scripts/spidercloud.ts docs/research/website https://wfco.co https://wfco.co/about https://wfco.co/pricing https://wfco.co/walkthrough`
+4. Read `.env` to get API key (fall back to template repo if not found locally)
+5. Run: `SPIDERCLOUD_API_KEY=<key> npx tsx scripts/spidercloud.ts docs/research/website https://wfco.co https://wfco.co/about https://wfco.co/pricing https://wfco.co/walkthrough`
 
 ## Error Handling
 
 - If WebSearch returns no results, try with `inurl:` variations
 - If a page fails to scrape, continue with other pages
 - If site is unreachable, report and suggest trying later
+- **SPIDERCLOUD_API_KEY not found:**
+  1. First check `.env` in current working directory
+  2. Fall back to template repo's `.env` (e.g., `../gtm-agent-example/.env`)
+  3. If neither found, inform user to copy `.env.example` to `.env` and add key
 
 ## Dependencies
 
