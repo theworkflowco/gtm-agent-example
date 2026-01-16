@@ -1,5 +1,12 @@
 {
   "name": "gtm-agent",
   "version": "1.0.0",
-  "description": "GTM context generation skills. Crawls company websites, researches public sources, and generates complete context files for go-to-market campaigns."
+  "description": "GTM context generation skills. Crawls company websites, researches public sources, and generates complete context files for go-to-market campaigns.",
+  "commands": [
+    {
+      "name": "setup",
+      "description": "Set up company context from a URL - crawls website, researches public sources, generates all context files",
+      "path": "commands/setup.md"
+    }
+  ]
 }
